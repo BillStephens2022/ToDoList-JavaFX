@@ -5,16 +5,18 @@ import com.billstephens.todolist.datamodel.TodoItem;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TextArea;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ToDoListController {
     private List<TodoItem> todoItems;
@@ -27,6 +29,9 @@ public class ToDoListController {
 
     @FXML
     private Label deadlineLabel;
+
+    @FXML
+    private BorderPane mainBorderPane;
 
     public void initialize() {
 //        TodoItem item1 = new TodoItem("Mail birthday card",
@@ -68,6 +73,32 @@ public class ToDoListController {
         todoListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         todoListView.getSelectionModel().selectFirst();
 
+    }
+
+    @FXML
+    public void showNewItemDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(mainBorderPane.getScene().getWindow());
+        FXMLLoader fxmlLoader = new FXMLLoader();
+        fxmlLoader.setLocation(getClass().getResource("todoItemDialog.fxml"));
+        try {
+            dialog.getDialogPane().setContent(fxmlLoader.load());
+        } catch (IOException e) {
+            System.out.println("Couldn't load the dialog");
+            e.printStackTrace();
+            return;
+        }
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            DialogController controller = fxmlLoader.getController();
+            controller.processResults();
+            System.out.println("OK pressed");
+        } else {
+            System.out.println("Cancel pressed");
+        }
     }
 
     public void handleClickListView() {
